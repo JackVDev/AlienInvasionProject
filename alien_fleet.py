@@ -10,18 +10,18 @@ class AlienFleet:
 
     def __init__(self, game: 'AlienInvasion'):
         self.game = game
-        self.setttings = game.settings
+        self.settings = game.settings
         self.fleet = pygame.sprite.Group()
-        self.fleet_direction = self.setttings.fleet_direction
-        self.fleet_drop_speed = self.setttings.fleet_drop_speed
+        self.fleet_direction = self.settings.fleet_direction
+        self.fleet_drop_speed = self.settings.fleet_drop_speed
 
         self.create_fleet()
     
     def create_fleet(self):
-        alien_w = self.setttings.alien_w
-        alien_h = self.setttings.alien_h
-        screen_w = self.setttings.screen_w
-        screen_h = self.setttings.screen_h
+        alien_w = self.settings.alien_w
+        alien_h = self.settings.alien_h
+        screen_w = self.settings.screen_w
+        screen_h = self.settings.screen_h
 
         fleet_w, fleet_h = self.calculate_fleet_size(alien_w, screen_w, alien_h, screen_h)
         x_offset, y_offset = self.calculate_offsets(alien_w, alien_h, screen_w, fleet_w, fleet_h)
@@ -38,7 +38,7 @@ class AlienFleet:
                 self._create_alien(current_x, current_y)
 
     def calculate_offsets(self, alien_w, alien_h, screen_w, fleet_w, fleet_h):
-        half_screen = self.setttings.screen_h // 2
+        half_screen = self.settings.screen_h // 2
         fleet_horizonal_space = fleet_w * alien_w
         fleet_vetical_space = fleet_h * alien_h
         x_offset = int((screen_w - fleet_horizonal_space) // 2)
@@ -68,6 +68,24 @@ class AlienFleet:
 
         self.fleet.add(new_alien)
     
+    def _check_fleet_edges(self):
+        alien: Alien
+        for alien in self.fleet:
+            if alien.check_edges():
+                self._drop_alien_fleet()
+                self.fleet_direction *= -1
+                break
+
+    def _drop_alien_fleet(self):
+        alien: Alien
+        for alien in self.fleet:
+            alien.y += self.fleet_drop_speed
+
+    def update_fleet(self):
+        self._check_fleet_edges()
+        self.fleet.update()
+
+
     def draw(self):
         alien: 'Alien'
         for alien in self.fleet:
